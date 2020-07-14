@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:instagram_clone/models/models.dart';
 
 class AuthService {
-  static final _auth = FirebaseAuth.instance;
-  static final _firestore = Firestore.instance;
+  final _auth = FirebaseAuth.instance;
+  final _firestore = Firestore.instance;
 
-  static void signup(
+  Future<void> signup(
       {@required BuildContext context,
       @required String name,
       @required String email,
@@ -18,13 +19,13 @@ class AuthService {
 
       FirebaseUser signedInUser = authResult.user;
       if (signedInUser != null) {
-        await _firestore.collection('users').document(signedInUser.uid).setData(
-          {
-            'name': name,
-            'email': email,
-            'profileImageUrl': '',
-          },
-        );
+        final user =
+            User(name: name, email: email, bio: null, profileImageUrl: null);
+
+        await _firestore
+            .collection('users')
+            .document(signedInUser.uid)
+            .setData(user.toDocument());
 
         Navigator.pop(context);
       }
@@ -33,7 +34,8 @@ class AuthService {
     }
   }
 
-  static void login({@required String email, @required String password}) async {
+  Future<void> login(
+      {@required String email, @required String password}) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
     } on PlatformException catch (err) {
@@ -41,7 +43,9 @@ class AuthService {
     }
   }
 
-  static void logout() async {
+  Future<void> logout() async {
     await _auth.signOut();
   }
+
+  Stream<FirebaseUser> get user => _auth.onAuthStateChanged;
 }

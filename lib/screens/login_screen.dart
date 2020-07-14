@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:instagram_clone/screens/signup_screen.dart';
 import 'package:instagram_clone/services/auth_service.dart';
 import 'package:instagram_clone/widgets/custom_flat_button.dart';
+import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  static final id = 'login_screen';
-
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -13,49 +12,54 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _loginFormKey = GlobalKey<FormState>();
   String _email, _password;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Instagram',
-                style: const TextStyle(
-                  fontFamily: 'Billabong',
-                  fontSize: 40.0,
-                ),
-              ),
-              Form(
-                key: _loginFormKey,
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: double.infinity,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    _buildEmailTF(),
-                    _buildPasswordTF(),
-                    const SizedBox(height: 18.0),
-                    CustomFlatButton(
-                      buttonText: 'Login',
-                      onPressed: _submit,
+                    Text(
+                      'Instagram',
+                      style: const TextStyle(
+                        fontFamily: 'Billabong',
+                        fontSize: 40.0,
+                      ),
                     ),
-                    const SizedBox(height: 18.0),
-                    CustomFlatButton(
-                      buttonText: 'Signup',
-                      onPressed: () =>
-                          Navigator.pushNamed(context, SignupScreen.id),
+                    Form(
+                      key: _loginFormKey,
+                      child: Column(
+                        children: <Widget>[
+                          _buildEmailTF(),
+                          _buildPasswordTF(),
+                          const SizedBox(height: 18.0),
+                          CustomFlatButton(
+                            buttonText: 'Login',
+                            onPressed: _submit,
+                          ),
+                          const SizedBox(height: 18.0),
+                          CustomFlatButton(
+                            buttonText: 'Signup',
+                            onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => SignupScreen())),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -86,11 +90,16 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  _submit() {
+  _submit() async {
     if (_loginFormKey.currentState.validate()) {
       _loginFormKey.currentState.save();
 
-      AuthService.login(email: _email, password: _password);
+      setState(() => _isLoading = true);
+
+      await Provider.of<AuthService>(context, listen: false)
+          .login(email: _email, password: _password);
+
+      setState(() => _isLoading = false);
     }
   }
 }

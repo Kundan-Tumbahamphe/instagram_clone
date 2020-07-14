@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/services/auth_service.dart';
 import 'package:instagram_clone/widgets/custom_flat_button.dart';
+import 'package:provider/provider.dart';
 
 class SignupScreen extends StatefulWidget {
-  static final id = 'signup_screen';
-
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }
@@ -12,49 +11,52 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _signupFormKey = GlobalKey<FormState>();
   String _name, _email, _password;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: MediaQuery.of(context).size.height,
-          width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Instagram',
-                style: const TextStyle(
-                  fontFamily: 'Billabong',
-                  fontSize: 40.0,
-                ),
-              ),
-              Form(
-                key: _signupFormKey,
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: double.infinity,
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    _buildNameTF(),
-                    _buildEmailTF(),
-                    _buildPasswordTF(),
-                    const SizedBox(height: 18.0),
-                    CustomFlatButton(
-                      buttonText: 'Signup',
-                      onPressed: _submit,
+                    Text(
+                      'Instagram',
+                      style: const TextStyle(
+                        fontFamily: 'Billabong',
+                        fontSize: 40.0,
+                      ),
                     ),
-                    const SizedBox(height: 18.0),
-                    CustomFlatButton(
-                      buttonText: 'Back to login',
-                      onPressed: () => Navigator.pop(context),
+                    Form(
+                      key: _signupFormKey,
+                      child: Column(
+                        children: <Widget>[
+                          _buildNameTF(),
+                          _buildEmailTF(),
+                          _buildPasswordTF(),
+                          const SizedBox(height: 18.0),
+                          CustomFlatButton(
+                            buttonText: 'Signup',
+                            onPressed: _submit,
+                          ),
+                          const SizedBox(height: 18.0),
+                          CustomFlatButton(
+                            buttonText: 'Back to login',
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
@@ -97,12 +99,16 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  _submit() {
+  _submit() async {
     if (_signupFormKey.currentState.validate()) {
       _signupFormKey.currentState.save();
 
-      AuthService.signup(
+      setState(() => _isLoading = true);
+
+      await Provider.of<AuthService>(context, listen: false).signup(
           context: context, name: _name, email: _email, password: _password);
+
+      setState(() => _isLoading = false);
     }
   }
 }

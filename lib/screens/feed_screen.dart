@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/services/auth_service.dart';
+import 'package:provider/provider.dart';
 
 class FeedScreen extends StatefulWidget {
-  static final id = 'feed_screen';
-
   @override
   _FeedScreenState createState() => _FeedScreenState();
 }
@@ -12,10 +11,22 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: Text(
+          'Instagram',
+          style: const TextStyle(
+            color: Colors.black,
+            fontFamily: 'Billabong',
+            fontSize: 30.0,
+          ),
+        ),
+      ),
       backgroundColor: Colors.blue,
       body: Center(
         child: FlatButton(
-          onPressed: () => AuthService.logout(),
+          onPressed: () =>
+              Provider.of<AuthService>(context, listen: false).logout(),
           child: Text('Logout'),
         ),
       ),
