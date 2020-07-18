@@ -162,7 +162,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   _submit() async {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState.validate() && !_isLoading) {
       _formKey.currentState.save();
 
       setState(() => _isLoading = true);
@@ -182,7 +182,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await Provider.of<DatabaseService>(context, listen: false)
           .updateUser(user);
 
-      setState(() => _isLoading = false);
       Navigator.pop(context);
     }
   }

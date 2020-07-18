@@ -107,8 +107,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
       await Provider.of<AuthService>(context, listen: false).signup(
           context: context, name: _name, email: _email, password: _password);
-
-      setState(() => _isLoading = false);
     }
   }
 }

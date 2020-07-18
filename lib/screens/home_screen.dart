@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:instagram_clone/models/models.dart';
+import 'package:instagram_clone/models/user_data.dart';
+
 import 'package:instagram_clone/screens/screens.dart';
+import 'package:instagram_clone/services/database_service.dart';
+
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,8 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
           CreatePostScreen(),
           ActivityScreen(),
           ProfileScreen(
-              userId:
-                  Provider.of<UserData>(context, listen: false).currentUserID),
+            userId: Provider.of<UserData>(context, listen: false).currentUserID,
+            databaseService:
+                Provider.of<DatabaseService>(context, listen: false),
+          ),
         ],
         onPageChanged: (int index) {
           setState(() {

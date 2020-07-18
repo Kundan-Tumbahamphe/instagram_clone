@@ -13,7 +13,7 @@ class StorageService {
     final String path = tempDir.path;
     File compressedImageFile = await FlutterImageCompress.compressAndGetFile(
       image.absolute.path,
-      '$path/profileImage_$imageId.jpg',
+      '$path/instagramImage_$imageId.jpg',
       quality: 70,
     );
     return compressedImageFile;
@@ -40,6 +40,16 @@ class StorageService {
 
     String downloadUrl = await _uploadImage(
         'images/users/profileImage_$imageId.jpg', compressedImage);
+    return downloadUrl;
+  }
+
+  Future<String> uploadPostImageAndGetDownloadUrl(File imageFile) async {
+    String imageId = Uuid().v4();
+
+    File compressedImage = await _compressImage(imageId, imageFile);
+
+    String downloadUrl = await _uploadImage(
+        'images/posts/postImage_$imageId.jpg', compressedImage);
     return downloadUrl;
   }
 }

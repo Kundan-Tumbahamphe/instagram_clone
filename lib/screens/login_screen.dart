@@ -98,8 +98,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await Provider.of<AuthService>(context, listen: false)
           .login(email: _email, password: _password);
-
-      setState(() => _isLoading = false);
     }
   }
 }

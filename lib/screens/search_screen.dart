@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:instagram_clone/models/user_model.dart';
+import 'package:instagram_clone/models/models.dart';
+
+import 'package:instagram_clone/screens/profile_screen.dart';
 import 'package:instagram_clone/services/database_service.dart';
 import 'package:provider/provider.dart';
 
@@ -61,23 +63,45 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _users.length,
-              itemBuilder: (_, index) {
-                User user = _users[index];
+          : GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: ListView.builder(
+                itemCount: _users.length,
+                itemBuilder: (_, index) {
+                  User user = _users[index];
 
-                return ListTile(
-                  title: Text(user.name),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.grey,
-                    backgroundImage: user.profileImageUrl.isEmpty
-                        ? AssetImage('assets/images/user_placeholder.jpg')
-                        : CachedNetworkImageProvider(user.profileImageUrl),
-                    radius: 20.0,
-                  ),
-                );
-              },
+                  return ListTile(
+                    title: Text(user.name),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      backgroundImage: user.profileImageUrl.isEmpty
+                          ? AssetImage('assets/images/user_placeholder.jpg')
+                          : CachedNetworkImageProvider(user.profileImageUrl),
+                      radius: 20.0,
+                    ),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProfileScreen(
+                          userId: user.id,
+                          currentUserId:
+                              Provider.of<UserData>(context, listen: false)
+                                  .currentUserID,
+                          databaseService: Provider.of<DatabaseService>(context,
+                              listen: false),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }
