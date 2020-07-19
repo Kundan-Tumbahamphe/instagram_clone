@@ -106,6 +106,19 @@ class DatabaseService {
             snapshot.documents.map((doc) => Post.fromSnapshot(doc)).toList());
   }
 
+  Future<List<Post>> getUserPosts(String userId) async {
+    QuerySnapshot userPostsQuerySnapshot = await postsRef
+        .document(userId)
+        .collection('userPost')
+        .orderBy('timestamp', descending: true)
+        .getDocuments();
+
+    List<Post> posts = userPostsQuerySnapshot.documents
+        .map((doc) => Post.fromSnapshot(doc))
+        .toList();
+    return posts;
+  }
+
   Future<User> getUser(String userId) async {
     DocumentSnapshot userDocSnapshot = await usersRef.document(userId).get();
     return User.fromSnapshot(userDocSnapshot);

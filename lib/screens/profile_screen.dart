@@ -4,6 +4,7 @@ import 'package:instagram_clone/models/models.dart';
 import 'package:instagram_clone/screens/edit_profile_screen.dart';
 import 'package:instagram_clone/services/database_service.dart';
 import 'package:instagram_clone/utilities/constants.dart';
+import 'package:instagram_clone/widgets/post_view.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -24,6 +25,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isFollowing = false;
   int _followerCount = 0;
   int _followingCount = 0;
+  List<Post> _posts = [];
+  int _displayPosts = 0;
+  User _profileUser;
 
   @override
   void initState() {
@@ -31,6 +35,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _setupIsFollowing();
     _setupFollowerCount();
     _setupFollowingCount();
+    _setupPosts();
+    _setupProfileUser();
   }
 
   _setupIsFollowing() async {
@@ -59,6 +65,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       _followingCount = userFollowingCount;
+    });
+  }
+
+  _setupPosts() async {
+    List<Post> posts = await widget.databaseService.getUserPosts(widget.userId);
+
+    setState(() {
+      _posts = posts;
+    });
+  }
+
+  _setupProfileUser() async {
+    User profileUser = await widget.databaseService.getUser(widget.userId);
+
+    setState(() {
+      _profileUser = profileUser;
     });
   }
 
@@ -126,6 +148,179 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
   }
 
+  _buildProfileInfo(User user) {
+    return Column(
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          width: double.infinity,
+          child: Row(
+            children: <Widget>[
+              CircleAvatar(
+                backgroundColor: Colors.grey,
+                backgroundImage: user.profileImageUrl.isEmpty
+                    ? AssetImage('assets/images/user_placeholder.jpg')
+                    : CachedNetworkImageProvider(user.profileImageUrl),
+                radius: 42.0,
+              ),
+              const SizedBox(width: 40.0),
+              Expanded(
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Column(
+                          children: <Widget>[
+                            Text(
+                              '12',
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              'Posts',
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Text(
+                              '$_followerCount',
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              'Followers',
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: <Widget>[
+                            Text(
+                              '$_followingCount',
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              'Following',
+                              style: const TextStyle(color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4.0),
+                    _displayButton(user),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          height: 70.0,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                user.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                ),
+              ),
+              const SizedBox(height: 4.0),
+              Text(
+                user.bio,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  _buildToggleButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.grid_on),
+          onPressed: () {
+            setState(() {
+              _displayPosts = 0;
+            });
+          },
+          iconSize: 24.0,
+          color: _displayPosts == 0 ? Colors.blue : Colors.grey[300],
+        ),
+        IconButton(
+          icon: Icon(Icons.list),
+          onPressed: () {
+            setState(() {
+              _displayPosts = 1;
+            });
+          },
+          iconSize: 26.0,
+          color: _displayPosts == 1 ? Colors.blue : Colors.grey[300],
+        ),
+      ],
+    );
+  }
+
+  _buildTile(Post post) {
+    return GridTile(
+      child: GestureDetector(
+        onTap: () => {},
+        child: Image(
+          image: CachedNetworkImageProvider(post.postImageUrl),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  _buildDisplayPosts() {
+    if (_displayPosts == 0) {
+      List<GridTile> tiles = [];
+      _posts.forEach(
+        (post) => tiles.add(_buildTile(post)),
+      );
+
+      return GridView.count(
+        crossAxisCount: 3,
+        childAspectRatio: 1.0,
+        mainAxisSpacing: 2.0,
+        crossAxisSpacing: 2.0,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        children: tiles,
+      );
+    } else {
+      List<PostView> postViews = [];
+      _posts.forEach((post) {
+        postViews.add(PostView(
+          post: post,
+          author: _profileUser,
+          currentUserId: widget.currentUserId,
+        ));
+      });
+      return Column(children: postViews);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,108 +347,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
           return ListView(
             children: <Widget>[
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20.0, vertical: 10.0),
-                width: double.infinity,
-                child: Row(
-                  children: <Widget>[
-                    CircleAvatar(
-                      backgroundColor: Colors.grey,
-                      backgroundImage: user.profileImageUrl.isEmpty
-                          ? AssetImage('assets/images/user_placeholder.jpg')
-                          : CachedNetworkImageProvider(user.profileImageUrl),
-                      radius: 42.0,
-                    ),
-                    const SizedBox(width: 40.0),
-                    Expanded(
-                      child: Column(
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Column(
-                                children: <Widget>[
-                                  Text(
-                                    '12',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Posts',
-                                    style:
-                                        const TextStyle(color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: <Widget>[
-                                  Text(
-                                    '$_followerCount',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Followers',
-                                    style:
-                                        const TextStyle(color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                children: <Widget>[
-                                  Text(
-                                    '$_followingCount',
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Following',
-                                    style:
-                                        const TextStyle(color: Colors.black54),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4.0),
-                          _displayButton(user),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 70.0,
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                width: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      user.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
-                      ),
-                    ),
-                    const SizedBox(height: 4.0),
-                    Text(
-                      user.bio,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
+              _buildProfileInfo(user),
               Divider(),
+              _buildToggleButtons(),
+              Divider(),
+              _buildDisplayPosts(),
             ],
           );
         },
