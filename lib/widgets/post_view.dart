@@ -4,6 +4,7 @@ import 'package:animator/animator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/models.dart';
+import 'package:instagram_clone/screens/comment_screen.dart';
 import 'package:instagram_clone/screens/profile_screen.dart';
 import 'package:instagram_clone/services/database_service.dart';
 import 'package:provider/provider.dart';
@@ -95,7 +96,8 @@ class _PostViewState extends State<PostView> {
               builder: (_) => ProfileScreen(
                 userId: widget.post.authorId,
                 currentUserId: widget.currentUserId,
-                databaseService: Provider.of<DatabaseService>(context),
+                databaseService:
+                    Provider.of<DatabaseService>(context, listen: false),
               ),
             ),
           ),
@@ -174,7 +176,10 @@ class _PostViewState extends State<PostView> {
               IconButton(
                 icon: Icon(Icons.insert_comment),
                 iconSize: 25.0,
-                onPressed: () {},
+                onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => CommentScreen(post: widget.post))),
               ),
             ],
           ),

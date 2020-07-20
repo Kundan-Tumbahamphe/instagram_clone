@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:instagram_clone/models/models.dart';
-
 import 'package:instagram_clone/services/services.dart';
 import 'package:provider/provider.dart';
 

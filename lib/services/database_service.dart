@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:instagram_clone/models/models.dart';
-
 import 'package:instagram_clone/utilities/constants.dart';
 import 'package:meta/meta.dart';
 
@@ -176,5 +175,20 @@ class DatabaseService {
         .get();
 
     return doc.exists;
+  }
+
+  Future<void> commentOnPost(
+      {@required String currentUserId,
+      @required Post post,
+      @required String content}) async {
+    final comment = Comment(
+      authorId: currentUserId,
+      content: content,
+      timestamp: Timestamp.fromDate(DateTime.now()),
+    );
+    await commentsRef
+        .document(post.id)
+        .collection('postComments')
+        .add(comment.toDocument());
   }
 }

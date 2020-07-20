@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/models.dart';
-
 import 'package:instagram_clone/services/database_service.dart';
 import 'package:instagram_clone/widgets/post_view.dart';
 import 'package:provider/provider.dart';
