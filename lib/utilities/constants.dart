@@ -7,6 +7,7 @@ final CollectionReference postsRef = _firestore.collection('posts');
 final CollectionReference followersRef = _firestore.collection('followers');
 final CollectionReference followingRef = _firestore.collection('following');
 final CollectionReference feedsRef = _firestore.collection('feeds');
+final CollectionReference likesRef = _firestore.collection('likes');
 
 final FirebaseStorage _storage = FirebaseStorage.instance;
 final StorageReference storageRef = _storage.ref();

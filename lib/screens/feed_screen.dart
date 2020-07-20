@@ -13,7 +13,8 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
-    final currentUserId = Provider.of<UserData>(context).currentUserID;
+    final currentUserId =
+        Provider.of<UserData>(context, listen: false).currentUserID;
 
     return Scaffold(
       appBar: AppBar(
@@ -28,8 +29,8 @@ class _FeedScreenState extends State<FeedScreen> {
         ),
       ),
       body: StreamBuilder(
-        stream:
-            Provider.of<DatabaseService>(context).getFeedPosts(currentUserId),
+        stream: Provider.of<DatabaseService>(context, listen: false)
+            .getFeedPosts(currentUserId),
         builder: (_, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return SizedBox.shrink();
@@ -43,7 +44,7 @@ class _FeedScreenState extends State<FeedScreen> {
               Post post = posts[index];
 
               return FutureBuilder(
-                future: Provider.of<DatabaseService>(context)
+                future: Provider.of<DatabaseService>(context, listen: false)
                     .getUser(post.authorId),
                 builder: (_, AsyncSnapshot snapshot) {
                   if (!snapshot.hasData) {
@@ -53,7 +54,12 @@ class _FeedScreenState extends State<FeedScreen> {
                   User author = snapshot.data;
 
                   return PostView(
-                      post: post, author: author, currentUserId: currentUserId);
+                    post: post,
+                    author: author,
+                    currentUserId: currentUserId,
+                    databaseService:
+                        Provider.of<DatabaseService>(context, listen: false),
+                  );
                 },
               );
             },

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram_clone/models/models.dart';
 import 'package:instagram_clone/screens/edit_profile_screen.dart';
+import 'package:instagram_clone/services/auth_service.dart';
 import 'package:instagram_clone/services/database_service.dart';
 import 'package:instagram_clone/utilities/constants.dart';
 import 'package:instagram_clone/widgets/post_view.dart';
@@ -315,6 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           post: post,
           author: _profileUser,
           currentUserId: widget.currentUserId,
+          databaseService: Provider.of<DatabaseService>(context, listen: false),
         ));
       });
       return Column(children: postViews);
@@ -335,6 +337,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             fontSize: 30.0,
           ),
         ),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.exit_to_app),
+            onPressed: () =>
+                Provider.of<AuthService>(context, listen: false).logout(),
+          ),
+        ],
       ),
       body: FutureBuilder(
         future: usersRef.document(widget.userId).get(),

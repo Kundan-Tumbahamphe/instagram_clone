@@ -123,4 +123,58 @@ class DatabaseService {
     DocumentSnapshot userDocSnapshot = await usersRef.document(userId).get();
     return User.fromSnapshot(userDocSnapshot);
   }
+
+  Future<void> likePost(
+      {@required String currentUserId, @required Post post}) async {
+    DocumentReference postDocRef = postsRef
+        .document(post.authorId)
+        .collection('userPost')
+        .document(post.id);
+
+    await postDocRef.get().then((doc) async {
+      int likeCount = doc.data['likeCount'] ?? 0;
+      postDocRef.updateData({'likeCount': likeCount + 1});
+
+      await likesRef
+          .document(post.id)
+          .collection('postLikes')
+          .document(currentUserId)
+          .setData({});
+    });
+  }
+
+  Future<void> unlikePost(
+      {@required String currentUserId, @required Post post}) async {
+    DocumentReference postDocRef = postsRef
+        .document(post.authorId)
+        .collection('userPost')
+        .document(post.id);
+
+    await postDocRef.get().then((doc) async {
+      int likeCount = doc.data['likeCount'] ?? 0;
+      postDocRef.updateData({'likeCount': likeCount - 1});
+
+      await likesRef
+          .document(post.id)
+          .collection('postLikes')
+          .document(currentUserId)
+          .get()
+          .then((doc) {
+        if (doc.exists) {
+          doc.reference.delete();
+        }
+      });
+    });
+  }
+
+  Future<bool> didLikePost(
+      {@required String currentUserId, @required Post post}) async {
+    DocumentSnapshot doc = await likesRef
+        .document(post.id)
+        .collection('postLikes')
+        .document(currentUserId)
+        .get();
+
+    return doc.exists;
+  }
 }
