@@ -31,7 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
           FeedScreen(),
           SearchScreen(),
           CreatePostScreen(),
-          ActivityScreen(),
+          ActivityScreen(
+            currentUserId:
+                Provider.of<UserData>(context, listen: false).currentUserID,
+          ),
           ProfileScreen(
             userId: Provider.of<UserData>(context, listen: false).currentUserID,
             databaseService:

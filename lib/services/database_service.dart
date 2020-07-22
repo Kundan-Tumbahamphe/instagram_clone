@@ -139,6 +139,8 @@ class DatabaseService {
           .collection('postLikes')
           .document(currentUserId)
           .setData({});
+
+      _addActivityItem(currentUserId: currentUserId, post: post, content: null);
     });
   }
 
@@ -190,5 +192,48 @@ class DatabaseService {
         .document(post.id)
         .collection('postComments')
         .add(comment.toDocument());
+
+    _addActivityItem(
+        currentUserId: currentUserId, post: post, content: content);
+  }
+
+  Future<void> _addActivityItem(
+      {String currentUserId, Post post, String content}) async {
+    if (currentUserId != post.authorId) {
+      Activity activity = Activity(
+        fromUserId: currentUserId,
+        postId: post.id,
+        postImageUrl: post.postImageUrl,
+        content: content,
+        timestamp: Timestamp.fromDate(DateTime.now()),
+      );
+
+      await activitiesRef
+          .document(post.authorId)
+          .collection('userActivities')
+          .add(activity.toDocument());
+    }
+  }
+
+  Stream<List<Activity>> getActivities(String userId) {
+    return activitiesRef
+        .document(userId)
+        .collection('userActivities')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.documents
+            .map((doc) => Activity.fromSnapshot(doc))
+            .toList());
+  }
+
+  Future<Post> getUserPost(
+      {@required String userId, @required String postId}) async {
+    DocumentSnapshot postDocSnapshot = await postsRef
+        .document(userId)
+        .collection('userPost')
+        .document(postId)
+        .get();
+
+    return Post.fromSnapshot(postDocSnapshot);
   }
 }
